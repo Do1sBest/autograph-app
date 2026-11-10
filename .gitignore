@@ -1,0 +1,32 @@
+# === Gradle / 빌드 산출물 (올리지 않음) ===
+.gradle/
+build/
+/app/build/
+
+# === Android Studio / IntelliJ 설정·캐시 ===
+.idea/
+*.iml
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# === 머신별 로컬 설정 (SDK 경로 등 — 절대 올리지 않음) ===
+local.properties
+
+# === 빌드 결과물 / APK ===
+*.apk
+/apk/*.apk
+
+# === 미사용 소스 에셋 (GLB는 렌더 PNG로 대체됨 — 용량 약 8MB) ===
+app/src/main/assets/*.glb
+
+# === 서명 키 / 비밀값 (안전장치) ===
+*.jks
+*.keystore
+google-services.json
+secrets.properties
+
+# === OS 잡파일 ===
+.DS_Store
+Thumbs.db

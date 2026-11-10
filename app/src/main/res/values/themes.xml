@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose에서 실제 색상을 다루므로 베이스 테마만 둡니다. -->
+    <style name="Theme.Autograph" parent="android:Theme.Material.NoActionBar" />
+</resources>

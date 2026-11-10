@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Android Automotive OS(차량용) 앱임을 선언 -->
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="true" />
+
+    <!-- 기어(GEAR_SELECTION) 읽기 권한. 일반 앱은 스톡 에뮬레이터에서 미승인될 수 있으며,
+         그 경우 앱은 화면 기어 셀렉터로 자동 폴백한다(코드에서 try/catch 처리). -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Autograph">
+
+        <uses-library android:name="android.car" android:required="false" />
+
+        <!-- 차량용 앱 메타데이터 -->
+        <meta-data
+            android:name="com.android.automotive"
+            android:resource="@xml/automotive_app_desc" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Autograph">
+            <!-- 주행 중에도 표시 가능(운전자 주의분산 최적화 선언).
+                 주행 화면은 글랜서블 텔레메트리라 운전 중 사용에 적합. -->
+            <meta-data
+                android:name="distractionOptimized"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

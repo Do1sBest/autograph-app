@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<automotiveApp>
+    <!-- 미디어/템플릿 앱이 아닌 일반 차량용(비디오 비사용) 앱 선언 예시 -->
+    <uses name="template" />
+</automotiveApp>
