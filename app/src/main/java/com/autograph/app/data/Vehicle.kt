@@ -55,6 +55,8 @@ data class TripReport(
     val hardAccels: Int,
     val valueImpact: String,
     val weekKm: Int,
+    val eff: String,        // 평균 연비/전비 값
+    val effLabel: String,   // "평균 연비" / "평균 전비"
 )
 
 /**

@@ -1,5 +1,7 @@
 package com.autograph.app.ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -70,17 +72,20 @@ fun AutographApp(vm: VehicleViewModel = viewModel()) {
         Column(Modifier.fillMaxSize()) {
             TopHeader(snapshot, gear, scene)
             Box(Modifier.weight(1f).fillMaxWidth()) {
-                when (scene) {
-                    Scene.PARKED -> ParkedScreen(
-                        snapshot = snapshot,
-                        modelKeys = vm.modelKeys,
-                        selected = selected,
-                        onSelect = vm::select,
-                        onOpenPassport = { showPassport = true },
-                    )
-                    Scene.DRIVING -> DrivingScreen(snapshot)
-                    Scene.END -> EndScreen(snapshot, vm.trip()) { endPending = false }
-                    Scene.PASSPORT -> PassportScreen(snapshot) { showPassport = false }
+                // 기어 전환 시 화면이 급하게 바뀌지 않도록 부드럽게 크로스페이드
+                Crossfade(targetState = scene, animationSpec = tween(400), label = "scene") { sc ->
+                    when (sc) {
+                        Scene.PARKED -> ParkedScreen(
+                            snapshot = snapshot,
+                            modelKeys = vm.modelKeys,
+                            selected = selected,
+                            onSelect = vm::select,
+                            onOpenPassport = { showPassport = true },
+                        )
+                        Scene.DRIVING -> DrivingScreen(snapshot)
+                        Scene.END -> EndScreen(snapshot, vm.trip()) { endPending = false }
+                        Scene.PASSPORT -> PassportScreen(snapshot) { showPassport = false }
+                    }
                 }
             }
             GearBar(gear, realConnected) { manualGear = it }

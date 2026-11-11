@@ -82,8 +82,8 @@ class MockVehicleDataSource : VehicleDataRepository {
     }
 
     override fun trip(key: String): TripReport = when (key) {
-        "elantra" -> TripReport(todayKm = 31.2, durationMin = 48, hardBrakes = 1, hardAccels = 2, valueImpact = "소폭 감소", weekKm = 168)
-        "ioniq5" -> TripReport(todayKm = 24.6, durationMin = 38, hardBrakes = 0, hardAccels = 0, valueImpact = "거의 없음", weekKm = 121)
-        else -> TripReport(todayKm = 28.4, durationMin = 42, hardBrakes = 0, hardAccels = 1, valueImpact = "거의 없음", weekKm = 142)
+        "elantra" -> TripReport(todayKm = 31.2, durationMin = 48, hardBrakes = 1, hardAccels = 2, valueImpact = "소폭 감소", weekKm = 168, eff = "12.4 km/L", effLabel = "평균 연비")
+        "ioniq5" -> TripReport(todayKm = 24.6, durationMin = 38, hardBrakes = 0, hardAccels = 0, valueImpact = "거의 없음", weekKm = 121, eff = "5.6 km/kWh", effLabel = "평균 전비")
+        else -> TripReport(todayKm = 28.4, durationMin = 42, hardBrakes = 0, hardAccels = 1, valueImpact = "거의 없음", weekKm = 142, eff = "13.8 km/L", effLabel = "평균 연비")
     }
 }

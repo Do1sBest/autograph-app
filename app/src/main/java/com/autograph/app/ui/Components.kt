@@ -7,8 +7,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -16,6 +23,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,6 +44,12 @@ fun keyName(key: String): String = when (key) {
 /** 원형 컨디션 점수 링 */
 @Composable
 fun MiniScoreRing(score: Int, color: Color, modifier: Modifier = Modifier, numberSp: Int = 22) {
+    var started by remember { mutableStateOf(false) }
+    LaunchedEffect(score) { started = true }
+    val sweep by animateFloatAsState(
+        targetValue = if (started) score / 100f else 0f,
+        animationSpec = tween(900), label = "ring"
+    )
     Box(modifier, contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val stroke = size.minDimension * 0.11f
@@ -44,13 +58,13 @@ fun MiniScoreRing(score: Int, color: Color, modifier: Modifier = Modifier, numbe
             val arcSize = Size(d, d)
             drawArc(Palette.Line, -90f, 360f, false, topLeft, arcSize, style = Stroke(stroke))
             drawArc(
-                color, -90f, 360f * (score / 100f), false, topLeft, arcSize,
+                color, -90f, 360f * sweep, false, topLeft, arcSize,
                 style = Stroke(stroke, cap = StrokeCap.Round)
             )
         }
         Text(
             "$score", color = Palette.Ink, fontWeight = FontWeight.Bold,
-            fontSize = numberSp.sp
+            fontFamily = FontFamily.Monospace, fontSize = numberSp.sp
         )
     }
 }

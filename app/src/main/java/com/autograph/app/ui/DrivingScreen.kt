@@ -9,10 +9,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,9 +58,9 @@ fun DrivingScreen(snapshot: VehicleSnapshot) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         // 상단: 기어/속도
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("D", color = Palette.Accent, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text("D", color = Palette.Accent, fontSize = 30.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             Spacer(Modifier.width(14.dp))
-            Text("${speed.toInt()}", color = Palette.Ink, fontSize = 40.sp, fontWeight = FontWeight.Bold)
+            Text("${speed.toInt()}", color = Palette.Ink, fontSize = 40.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             Text(" km/h", color = Palette.Ink2, fontSize = 14.sp)
             Spacer(Modifier.weight(1f))
             Text("주행 중 · 라이브 텔레메트리", color = Palette.Ink2, fontSize = 13.sp)
@@ -69,8 +72,8 @@ fun DrivingScreen(snapshot: VehicleSnapshot) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Trace("속도", "${speed.toInt()} km/h", speedBuf, frame, 150f, Palette.Accent, Modifier.weight(1f))
-            Trace("브레이크", "${(brakeNow * 100).toInt()}%", brakeBuf, frame, 1f, Palette.Warn, Modifier.weight(1f))
-            Trace("스티어링", steerLabel(steerNow), steerBuf, frame, 1f, Palette.Value, Modifier.weight(1f))
+            Trace("브레이크", "${(brakeNow * 100).toInt()}%", brakeBuf, frame, 1f, Palette.Crit, Modifier.weight(1f))
+            Trace("스티어링", steerLabel(steerNow), steerBuf, frame, 1f, Palette.Value2, Modifier.weight(1f))
         }
         Spacer(Modifier.height(10.dp))
         // 하단 스트립
@@ -113,22 +116,28 @@ private fun Trace(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(label, color = Palette.Ink2, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
-            Text(value, color = color, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            Text(value, color = color, fontSize = 15.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
         }
         Spacer(Modifier.height(6.dp))
         Canvas(Modifier.fillMaxSize()) {
             frame.let { } // 프레임 상태를 읽어 매 틱 재그리기
             val w = size.width
             val h = size.height
-            // 베이스라인
-            drawLine(Palette.Line, androidx.compose.ui.geometry.Offset(0f, h), androidx.compose.ui.geometry.Offset(w, h), 1f)
+            drawLine(Palette.Line, Offset(0f, h), Offset(w, h), 1f) // 베이스라인
             val path = Path()
+            var lastX = 0f
+            var lastY = h
             for (i in buf.indices) {
                 val x = w * i / (buf.size - 1)
                 val y = h - (buf[i] / maxV).coerceIn(0f, 1f) * (h * 0.92f) - h * 0.04f
                 if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                lastX = x; lastY = y
             }
+            // 면적 그라데이션
+            val fill = Path().apply { addPath(path); lineTo(w, h); lineTo(0f, h); close() }
+            drawPath(fill, brush = Brush.verticalGradient(listOf(color.copy(alpha = 0.26f), color.copy(alpha = 0f))))
             drawPath(path, color, style = Stroke(width = 3f, cap = StrokeCap.Round))
+            drawCircle(color, 4.5f, Offset(lastX, lastY)) // 현재값 점
         }
     }
 }
