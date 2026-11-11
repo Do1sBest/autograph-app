@@ -38,6 +38,7 @@ fun ParkedScreen(
     var carIndex by remember(snapshot.key) { mutableStateOf(TURNTABLE_DEFAULT) }
     val atFront = carIndex == TURNTABLE_DEFAULT
     val hotspots = rememberHotspots()
+    var carePart by remember(snapshot.key) { mutableStateOf<VehiclePart?>(null) }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         ValueBand(snapshot, onOpenPassport)
         Spacer(Modifier.height(12.dp))
@@ -105,13 +106,15 @@ fun ParkedScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     snapshot.parts.forEachIndexed { i, p ->
-                        PartRow(i, p)
+                        // 문제 항목만 탭 가능 → 케어 시트(해결 다음 단계)
+                        PartRow(i, p, if (p.care != null) ({ carePart = p }) else null)
                         if (i != snapshot.parts.lastIndex) Spacer(Modifier.height(6.dp))
                     }
                 }
             }
         }
     }
+    carePart?.let { part -> PartCareDialog(part, snapshot.model) { carePart = null } }
 }
 
 @Composable

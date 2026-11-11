@@ -84,9 +84,13 @@ fun SourceTag(source: DataSource, modifier: Modifier = Modifier) {
 
 /** 상태 맵 부품 1행 */
 @Composable
-fun PartRow(index: Int, part: VehiclePart) {
+fun PartRow(index: Int, part: VehiclePart, onClick: (() -> Unit)? = null) {
     val dot = part.status.color()
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+    ) {
         Box(
             Modifier.size(20.dp).background(dot, CircleShape),
             contentAlignment = Alignment.Center
@@ -103,6 +107,10 @@ fun PartRow(index: Int, part: VehiclePart) {
         )
         Spacer(Modifier.width(6.dp))
         SourceTag(part.source)
+        if (onClick != null) {
+            Spacer(Modifier.width(6.dp))
+            Text("›", color = Palette.Ink2, fontSize = 16.sp)
+        }
     }
 }
 

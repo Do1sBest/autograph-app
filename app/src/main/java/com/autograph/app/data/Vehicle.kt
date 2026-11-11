@@ -13,6 +13,21 @@ enum class DataSource(val label: String) {
 /** 3D 인포그래픽에서 문제 부위를 가리킬 위치 */
 enum class HotspotRole { NONE, HOOD, TIRE_FL, TIRE_FR, TIRE_RL, TIRE_RR, BRAKE }
 
+/** 문제 항목의 '해결 다음 단계' 정보 (케어 시트). 부품번호·사양은 실연동 시 VIN 기준 정품 카탈로그로 확정. */
+data class PartCare(
+    val reason: String,     // 왜 지금인지
+    val timing: String,     // 권장 시점
+    val spec: String,       // 권장 사양
+    val partNo: String,     // 정품 부품번호(데모는 예시)
+)
+
+/** 외관 상태 — 밸류 패스포트의 '검증 외관' 항목 */
+data class ExteriorStatus(
+    val verified: Boolean,
+    val lastCheck: String,
+    val note: String,
+)
+
 /** 상태 맵에 표시되는 개별 부위 */
 data class VehiclePart(
     val name: String,
@@ -20,6 +35,7 @@ data class VehiclePart(
     val status: PartStatus,
     val source: DataSource,
     val hotspot: HotspotRole = HotspotRole.NONE,
+    val care: PartCare? = null,
 )
 
 /** 밸류 패스포트 행 */
@@ -42,6 +58,11 @@ data class VehicleSnapshot(
     val passport: List<PassportRow>,
     val voice: String,
     val carImage: String,               // assets/ 내 3/4 뷰 PNG 파일명
+    val exterior: ExteriorStatus = ExteriorStatus(
+        verified = false,
+        lastCheck = "기록 없음",
+        note = "충격·주차 이벤트 감지 없음",
+    ),
 ) {
     /** 핵심 지표: 동일 연식 평균 대비 차이(+면 평균보다 높음) */
     val valueDiffManwon: Int get() = adjustedPriceManwon - standardPriceManwon

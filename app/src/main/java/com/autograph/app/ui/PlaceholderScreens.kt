@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -52,7 +52,28 @@ fun PassportScreen(s: VehicleSnapshot, onBack: () -> Unit) {
                 }
                 Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
             }
-            Spacer(Modifier.height(12.dp))
+            // 외관 — 평소엔 이벤트 감지만, 촬영은 선택(매각 준비 시 가치 근거)
+            var extNotice by remember { mutableStateOf(false) }
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("외관 상태", color = Palette.Ink2, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                Text(
+                    if (s.exterior.verified) "검증됨 · ${s.exterior.lastCheck}" else "미검증 · ${s.exterior.note}",
+                    color = if (s.exterior.verified) Palette.Good else Palette.Ink, fontSize = 15.sp, fontWeight = FontWeight.Medium
+                )
+            }
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
+            Text(
+                "외관 촬영으로 검증하기 (선택) ›",
+                color = Palette.Ink2, fontSize = 13.sp,
+                modifier = Modifier.clickable { extNotice = true }.padding(vertical = 8.dp)
+            )
+            if (extNotice) {
+                Text("데모: 10초 워크어라운드 촬영 가이드로 연결됩니다. 검증된 외관은 매각 시 가치 근거가 됩니다.", color = Palette.Good, fontSize = 12.sp)
+            }
+            Spacer(Modifier.height(8.dp))
             Text("🛡 차량 데이터 기반 검증 리포트", color = Palette.InkMut, fontSize = 13.sp)
         }
 
