@@ -26,6 +26,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="uiMode"
             android:label="@string/app_name"
             android:theme="@style/Theme.Autograph">
             <!-- 주행 중에도 표시 가능(운전자 주의분산 최적화 선언).

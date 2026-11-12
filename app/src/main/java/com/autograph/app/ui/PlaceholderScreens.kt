@@ -1,7 +1,8 @@
 package com.autograph.app.ui
 
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,104 +10,92 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.autograph.app.data.VehicleSnapshot
 import kotlin.math.abs
 
-/** 밸류 패스포트 — 주차 중 '자세히'로 진입. 웹 프로토타입과 동일(이력 + 보정가치 카드 + CTA). */
+/** 밸류 패스포트 — 주차 중 '밸류 패스포트'로 진입. 왼쪽 이력, 오른쪽 보정가치 + 한 가지 행동. */
 @Composable
 fun PassportScreen(s: VehicleSnapshot, onBack: () -> Unit) {
     val diff = s.valueDiffManwon
     Row(
-        Modifier.fillMaxSize().padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-        verticalAlignment = Alignment.CenterVertically
+        Modifier.fillMaxSize().padding(horizontal = Dim.Pad, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(28.dp)
     ) {
-        // 좌측 — 이력
-        Column(Modifier.weight(1.1f)) {
-            Text(
-                "← 주차 중으로",
-                color = Palette.Ink2, fontSize = 14.sp,
-                modifier = Modifier
-                    .background(Palette.Panel2, RoundedCornerShape(8.dp))
-                    .border(1.dp, Palette.Line, RoundedCornerShape(8.dp))
-                    .clickable(onClick = onBack)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
-            )
-            Spacer(Modifier.height(12.dp))
-            Text("밸류 패스포트", color = Palette.Ink, fontSize = 26.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            Spacer(Modifier.height(8.dp))
-            s.passport.forEach { row ->
-                Row(
-                    Modifier.fillMaxWidth().padding(vertical = 9.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(row.label, color = Palette.Ink2, fontSize = 15.sp, modifier = Modifier.weight(1f))
-                    Text(row.value, color = Palette.Ink, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                }
-                Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
+        // 왼쪽 — 이력
+        Column(Modifier.weight(1.1f).fillMaxHeight()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Btn("주차 중으로", BtnStyle.GHOST, fontSize = T.Label, leading = Icons.AutoMirrored.Filled.ArrowBack, onClick = onBack)
+                Spacer(Modifier.width(24.dp))
+                Text("밸류 패스포트", color = Palette.Ink, fontSize = T.Title, fontWeight = FontWeight.Bold)
             }
-            // 외관 — 평소엔 이벤트 감지만, 촬영은 선택(매각 준비 시 가치 근거)
-            var extNotice by remember { mutableStateOf(false) }
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 9.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Spacer(Modifier.height(Dim.Gap))
+            Column(
+                Modifier.fillMaxWidth()
+                    .background(Palette.Panel, RoundedCornerShape(Dim.Radius))
+                    .padding(horizontal = 28.dp, vertical = 8.dp)
             ) {
-                Text("외관 상태", color = Palette.Ink2, fontSize = 15.sp, modifier = Modifier.weight(1f))
-                Text(
+                s.passport.forEachIndexed { i, row ->
+                    HistoryRow(row.label, row.value)
+                    Divider()
+                }
+                // 외관 — 평소엔 이벤트 감지만, 촬영은 선택(매각 준비 시 가치 근거)
+                HistoryRow(
+                    "외관 상태",
                     if (s.exterior.verified) "검증됨 · ${s.exterior.lastCheck}" else "미검증 · ${s.exterior.note}",
-                    color = if (s.exterior.verified) Palette.Good else Palette.Ink, fontSize = 15.sp, fontWeight = FontWeight.Medium
+                    if (s.exterior.verified) Palette.Good else Palette.Ink
                 )
             }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
-            Text(
-                "외관 촬영으로 검증하기 (선택) ›",
-                color = Palette.Ink2, fontSize = 13.sp,
-                modifier = Modifier.clickable { extNotice = true }.padding(vertical = 8.dp)
-            )
+            Spacer(Modifier.height(12.dp))
+            var extNotice by remember { mutableStateOf(false) }
+            Btn("외관 촬영으로 검증하기 (선택)", BtnStyle.GHOST, fontSize = T.Label, trailing = IconNext) { extNotice = true }
             if (extNotice) {
-                Text("데모: 10초 워크어라운드 촬영 가이드로 연결됩니다. 검증된 외관은 매각 시 가치 근거가 됩니다.", color = Palette.Good, fontSize = 12.sp)
+                Text("데모: 10초 워크어라운드 촬영 가이드로 연결됩니다. 검증된 외관은 매각 시 가치 근거가 됩니다.", color = Palette.Good, fontSize = T.Caption)
             }
-            Spacer(Modifier.height(8.dp))
-            Text("🛡 차량 데이터 기반 검증 리포트", color = Palette.InkMut, fontSize = 13.sp)
+            Spacer(Modifier.weight(1f))
+            Text("🛡 차량 데이터 기반 검증 리포트", color = Palette.InkMut, fontSize = T.Caption)
         }
 
-        // 우측 — 보정 자산가치 카드
-        Column(
-            Modifier.weight(0.9f)
-                .background(
-                    Brush.verticalGradient(listOf(Color(0xFF15283A), Color(0xFF101A26))),
-                    RoundedCornerShape(16.dp)
+        // 오른쪽 — 보정 자산가치 카드 + 가치 흐름(정부 잔가율 곡선, 시세 보정 전)
+        val pd = rememberPriceData()
+        Column(Modifier.weight(0.9f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(Dim.Gap)) {
+            Column(
+                Modifier.fillMaxWidth()
+                    .background(Palette.Panel, RoundedCornerShape(Dim.Radius))
+                    .padding(horizontal = 28.dp, vertical = 22.dp)
+            ) {
+                Text("상태 반영 보정 자산가치", color = Palette.Ink2, fontSize = T.Body)
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(fmt(s.adjustedPriceManwon), color = Palette.Value2, fontSize = T.H1, fontWeight = FontWeight.Bold)
+                    Text(" 만원", color = Palette.Ink2, fontSize = T.Body, modifier = Modifier.padding(bottom = 8.dp))
+                    Spacer(Modifier.width(16.dp))
+                    Text("* 데모 값", color = Palette.InkMut, fontSize = T.Caption, modifier = Modifier.padding(bottom = 10.dp))
+                }
+                Text(
+                    "${if (diff >= 0) "▲" else "▼"} 표준 시세 대비 ${if (diff >= 0) "+" else "-"}${fmt(abs(diff))}만원 (관리 양호)",
+                    color = Palette.Good, fontSize = T.Label
                 )
-                .border(1.dp, Palette.Accent.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
-                .padding(horizontal = 22.dp, vertical = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text("상태 반영 보정 자산가치", color = Palette.Ink2, fontSize = 15.sp)
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(fmt(s.adjustedPriceManwon), color = Palette.Value2, fontSize = 44.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                Text(" 만원", color = Palette.Ink2, fontSize = 15.sp)
+                Spacer(Modifier.height(14.dp))
+                Btn("현대 인증중고차 견적 받기", BtnStyle.PRIMARY, Modifier.fillMaxWidth(), trailing = IconNext) { }
             }
-            Text(
-                "${if (diff >= 0) "▲" else "▼"} 표준 시세 대비 ${if (diff >= 0) "+" else "-"}${fmt(abs(diff))}만원 (관리 양호)",
-                color = Palette.Good, fontSize = 14.sp
-            )
-            Text(
-                "현대 인증중고차 견적 받기 →",
-                color = Color(0xFF05101F), fontSize = 15.sp, fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-                    .background(Palette.Accent, RoundedCornerShape(10.dp))
-                    .clickable { }
-                    .padding(horizontal = 16.dp, vertical = 13.dp)
-            )
-            Text("* 데모용 예시 수치입니다", color = Palette.InkMut, fontSize = 12.sp)
+            if (pd != null) ValueFlowCard(s, pd, Modifier.fillMaxWidth().weight(1f))
         }
     }
+}
+
+@Composable
+private fun HistoryRow(label: String, value: String, valueColor: androidx.compose.ui.graphics.Color = Palette.Ink) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 72.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, color = Palette.Ink2, fontSize = T.Label, modifier = Modifier.weight(1f))
+        Text(value, color = valueColor, fontSize = T.Body, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun Divider() {
+    Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
 }

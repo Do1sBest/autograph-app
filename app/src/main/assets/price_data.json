@@ -1,0 +1,118 @@
+{
+ "asOf": "2026-11-13",
+ "note": "오토그래프_가격자료_1113.xlsx 와 같은 원본(price_sources.md). 시세 보정 전.",
+ "residual": {
+  "label": "행안부 기타물건 시가표준액 조정기준 · 비영업용 국산 승용 잔가율",
+  "source": "https://www.gimhae.go.kr/00610/00639/00689.web",
+  "caveat": "세금(시가표준액)용, 고시 연도 미기재",
+  "rates": [
+   0.826,
+   0.725,
+   0.614,
+   0.518,
+   0.437,
+   0.368,
+   0.311,
+   0.262,
+   0.221,
+   0.186,
+   0.157,
+   0.132,
+   0.112,
+   0.094,
+   0.079,
+   0.067,
+   0.063,
+   0.06,
+   0.057,
+   0.053,
+   0.05
+  ]
+ },
+ "cpo": {
+  "years": 5,
+  "km": 100000,
+  "label": "현대 인증중고차 대상",
+  "source": "https://www.hyundaimotorgroup.com/ko/news/CONT0000000000117466"
+ },
+ "cars": {
+  "tucson": {
+   "trim": "모던",
+   "newPrice": 27710000,
+   "priceNote": "출시가(2023-12-06 보도자료), 세금 기준 표기 없음",
+   "priceSource": "https://www.hyundaimotorgroup.com/ko/amp/CONT0000000000125545",
+   "items": {
+    "엔진오일": {
+     "interval": "10,000km 또는 12개월 교체 (가혹 5,000km 또는 6개월)",
+     "intervalNormal": "10,000km · 12개월",
+     "intervalSevere": "5,000km · 6개월",
+     "spec": "4.8L · SAE 0W-20 · API SN PLUS/SP 또는 ILSAC GF-6",
+     "specMain": "4.8L · SAE 0W-20",
+     "specSub": "API SN PLUS/SP 또는 ILSAC GF-6",
+     "parts": [
+      {
+       "name": "오일필터",
+       "ptno": "263502M000",
+       "price": 5940
+      }
+     ],
+     "missing": "엔진오일 순정 가격·공임 확인 필요",
+     "source": "취급설명서 NX4 2024 · 모비스 부품 가격 검색",
+     "sourceShort": "투싼 취급설명서 · 모비스 부품 가격(직영점)"
+    },
+    "타이어(뒤우)": {
+     "interval": "공기압 점검 (교체 주기 없음)",
+     "spec": "권장 공기압 240 kPa (35 psi) · 출고 규격 235/65 R17, 235/60 R18, 235/55 R19",
+     "intervalNormal": "공기압 점검",
+     "intervalSevere": "",
+     "specMain": "240 kPa (35 psi)",
+     "specSub": "출고 규격 235/65 R17 · 235/60 R18 · 235/55 R19",
+     "parts": [],
+     "missing": "",
+     "source": "취급설명서 NX4 2024",
+     "sourceShort": "투싼 취급설명서"
+    }
+   }
+  },
+  "ioniq5": {
+   "trim": "롱레인지 E-Lite (2WD)",
+   "newPrice": 52400000,
+   "priceNote": "출시가(2024-03-04 보도자료), 전기차 세제혜택 적용 후",
+   "priceSource": "https://www.hyundaimotorgroup.com/ko/news/CONT0000000000137598",
+   "items": {
+    "타이어(뒤우)": {
+     "interval": "공기압 점검 (교체 주기 없음)",
+     "spec": "권장 공기압 250 kPa (36 psi, 19인치) / 235 kPa (34 psi, 20인치)",
+     "intervalNormal": "공기압 점검",
+     "intervalSevere": "",
+     "specMain": "250 kPa (19인치)",
+     "specSub": "20인치는 235 kPa (34 psi)",
+     "parts": [],
+     "missing": "",
+     "source": "취급설명서 NE1 2025(페이스리프트판)",
+     "sourceShort": "아이오닉 5 취급설명서"
+    }
+   }
+  },
+  "elantra": {
+   "trim": "모던",
+   "newPrice": 21830000,
+   "priceNote": "공식 가격표 판매가격(2022-03-08)",
+   "priceSource": "https://www.hyundai.com/contents/repn-car/catalog/avante-price.pdf",
+   "items": {
+    "미션오일": {
+     "interval": "자료 없음 — 확인 필요",
+     "spec": "자료 없음 — 확인 필요",
+     "intervalNormal": "확인 필요",
+     "intervalSevere": "",
+     "specMain": "확인 필요",
+     "specSub": "",
+     "parts": [],
+     "missing": "IVT 오일 교체 주기·가격 조사 안 함",
+     "source": "",
+     "sourceShort": ""
+    }
+   }
+  }
+ }
+}

@@ -3,7 +3,6 @@ package com.autograph.app.ui
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -18,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.autograph.app.data.Gear
@@ -53,6 +51,8 @@ fun AutographApp(vm: VehicleViewModel = viewModel()) {
     var prevGear by remember { mutableStateOf(gear) }
     LaunchedEffect(gear) {
         val moving = prevGear == Gear.DRIVE || prevGear == Gear.REVERSE || prevGear == Gear.NEUTRAL
+        val nowMoving = gear == Gear.DRIVE || gear == Gear.REVERSE || gear == Gear.NEUTRAL
+        if (nowMoving && !moving) vm.startTrip()             // 새 주행 기록 시작
         if (gear == Gear.PARK && moving) endPending = true   // 주행 후 P → 운전 종료
         if (gear != Gear.PARK) showPassport = false
         prevGear = gear
@@ -77,18 +77,15 @@ fun AutographApp(vm: VehicleViewModel = viewModel()) {
                     when (sc) {
                         Scene.PARKED -> ParkedScreen(
                             snapshot = snapshot,
-                            modelKeys = vm.modelKeys,
-                            selected = selected,
-                            onSelect = vm::select,
                             onOpenPassport = { showPassport = true },
                         )
-                        Scene.DRIVING -> DrivingScreen(snapshot)
-                        Scene.END -> EndScreen(snapshot, vm.trip()) { endPending = false }
+                        Scene.DRIVING -> DrivingScreen(snapshot, vm::record)
+                        Scene.END -> EndScreen(snapshot, vm.trip(), vm.tripSpeed, vm.tripBrake) { endPending = false }
                         Scene.PASSPORT -> PassportScreen(snapshot) { showPassport = false }
                     }
                 }
             }
-            GearBar(gear, realConnected) { manualGear = it }
+            DemoBar(gear, realConnected, scene, { manualGear = it }, vm.modelKeys, selected, vm::select)
         }
     }
 }
@@ -103,63 +100,67 @@ private fun sceneName(scene: Scene): String = when (scene) {
 @Composable
 private fun TopHeader(s: VehicleSnapshot, gear: Gear, scene: Scene) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth().padding(horizontal = Dim.Pad, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            Modifier.size(14.dp).background(
+            Modifier.size(18.dp).background(
                 Brush.sweepGradient(listOf(Palette.Good, Palette.Value, Palette.Accent, Palette.Good)),
                 CircleShape
             )
         )
-        Spacer(Modifier.width(8.dp))
-        Text("AUTOGRAPH", color = Palette.Ink, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.width(12.dp))
-        Text("${s.model} · ${s.year} · ${fmt(s.odometerKm)}km", color = Palette.Ink2, fontSize = 13.sp)
+        Text("AUTOGRAPH", color = Palette.Ink, fontSize = T.Body, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.width(18.dp))
+        Text("${s.model} · ${s.year} · ${fmt(s.odometerKm)}km", color = Palette.Ink2, fontSize = T.Label)
         Spacer(Modifier.weight(1f))
         // 현재 기어 + 상태
         Text(
             "${gear.label} · ${sceneName(scene)}",
             color = if (gear == Gear.PARK) Palette.Good else Palette.Accent,
-            fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+            fontSize = T.Label, fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .border(1.dp, Palette.Line, RoundedCornerShape(999.dp))
-                .padding(horizontal = 14.dp, vertical = 5.dp)
+                .background(Palette.Panel, RoundedCornerShape(999.dp))
+                .padding(horizontal = 20.dp, vertical = 8.dp)
         )
     }
 }
 
 /**
- * 하단 기어 표시/셀렉터.
- * 실제 기어 연동 시: 현재 단수 표시(읽기 전용).
- * 미연동(권한 없음 등): P/R/N/D 탭하여 데모 전환.
+ * 하단 데모 바.
+ * 실제 기어 연동 시: 기어 버튼은 숨김(상단에 현재 기어 표시) — 차종 데모 칩만.
+ * 미연동(권한 없음 등): P/R/N/D 탭하여 데모 전환 + 차종 칩.
+ * 주행 중에는 차종 칩도 숨김(주행 중 터치 요소 없음).
  */
 @Composable
-private fun GearBar(gear: Gear, realConnected: Boolean, onManual: (Gear) -> Unit) {
+private fun DemoBar(
+    gear: Gear, realConnected: Boolean, scene: Scene, onManual: (Gear) -> Unit,
+    modelKeys: List<String>, selected: String, onSelect: (String) -> Unit,
+) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().padding(horizontal = Dim.Pad, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(Gear.PARK, Gear.REVERSE, Gear.NEUTRAL, Gear.DRIVE).forEach { g ->
-                val on = g == gear
-                Text(
-                    g.label,
-                    color = if (on) Color(0xFF06101F) else Palette.Ink2,
-                    fontSize = 18.sp, fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(if (on) Palette.Accent else Palette.Panel, RoundedCornerShape(10.dp))
-                        .border(1.dp, if (on) Palette.Accent else Palette.Line, RoundedCornerShape(10.dp))
-                        .then(if (realConnected) Modifier else Modifier.clickable { onManual(g) })
-                        .padding(horizontal = 20.dp, vertical = 10.dp)
-                )
-            }
+        if (!realConnected) {
+            Text("데모 기어", color = Palette.InkMut, fontSize = T.Caption)
+            Spacer(Modifier.width(14.dp))
+            Segmented(
+                listOf(Gear.PARK, Gear.REVERSE, Gear.NEUTRAL, Gear.DRIVE).map { it to it.label },
+                gear, onManual, fontSize = T.Body,
+            )
+        } else {
+            Text("● 실제 기어 연동됨", color = Palette.Good, fontSize = T.Caption)
         }
         Spacer(Modifier.weight(1f))
-        Text(
-            if (realConnected) "● 실제 기어 연동됨" else "데모 기어 · 탭하여 변경 (실연동은 Pleos 단계)",
-            color = if (realConnected) Palette.Good else Palette.InkMut,
-            fontSize = 12.sp
-        )
+        if (scene != Scene.DRIVING) {
+            // 화면 모드(자동 = 차의 낮/밤 신호) — 비교·시연용
+            Text("화면", color = Palette.InkMut, fontSize = T.Caption)
+            Spacer(Modifier.width(14.dp))
+            Segmented(ThemeMode.values().map { it to it.label }, Palette.mode, { Palette.mode = it }, minWidth = 96.dp)
+            Spacer(Modifier.width(28.dp))
+            Text("데모 차종", color = Palette.InkMut, fontSize = T.Caption)
+            Spacer(Modifier.width(14.dp))
+            ModelChipRow(modelKeys, selected, onSelect)
+        }
     }
 }

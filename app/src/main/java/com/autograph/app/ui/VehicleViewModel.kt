@@ -1,5 +1,6 @@
 package com.autograph.app.ui
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.autograph.app.data.MockVehicleDataSource
 import com.autograph.app.data.TripReport
@@ -32,4 +33,19 @@ class VehicleViewModel(
     }
 
     fun trip(): TripReport = repo.trip(_selected.value)
+
+    /**
+     * 이번 주행 기록(1초에 한 번) — 주행 중에는 그래프를 그리지 않고 모아 두었다가
+     * 운전 종료 화면에서 보여 준다(주행 중 1fps 넘는 움직임 금지 기준).
+     */
+    val tripSpeed = mutableStateListOf<Float>()
+    val tripBrake = mutableStateListOf<Float>()
+
+    fun startTrip() {
+        tripSpeed.clear(); tripBrake.clear()
+    }
+
+    fun record(speed: Float, brake: Float) {
+        tripSpeed.add(speed); tripBrake.add(brake)
+    }
 }
