@@ -48,9 +48,9 @@ Pleos 시뮬레이터 API를 통해 **실제 신호로 받아오는 값**과, �
 
 | 구분 | 설명 | 항목 | 출처 |
 |---|---|---|---|
-| **실시간(Real-time)** | Pleos 시뮬레이터 API(도메인 조회)로 실제 신호를 수신 | 주행거리 · 타이어 · 브레이크 · EV 배터리 · 연료 · 와이퍼 · 스티어링 · 주행모드 | `Odometer·Tire·Brake·EvBattery·Fuel·Wiper·Steeringwheel·DrivingMode` |
-| **실시간(조건부)** | 지원 차량에 한해 실제 신호 제공 | 브레이크 패드 잔량 | `BRAKE_PAD_WEAR_PERCENTAGE` (100 − 마모%) |
-| **추정(Estimated)** | Pleos·표준 도메인에 신호가 없어 정비주기·주행거리 기반 알고리즘으로 계산 | 엔진오일 · 미션(변속기)오일 · 와이퍼 블레이드 수명 | `ValueEstimator` (실신호 아님) |
+| **실시간(Real-time)** | Pleos 시뮬레이터 API(도메인 조회)로 실제 신호를 수신 | 주행거리 · 타이어 저압 경고(TPMS) · 브레이크 · EV 배터리 · 연료 · 와이퍼 · 스티어링 · 주행모드 | `Odometer·Tire·Brake·EvBattery·Fuel·Wiper·Steeringwheel·DrivingMode` |
+| **실시간(조건부)** | 지원 차량에 한해 실제 신호 제공 | 브레이크 패드 잔량 (데모 데이터는 추정 표시) | `BRAKE_PAD_WEAR_PERCENTAGE` (100 − 마모%) |
+| **추정(Estimated)** | Pleos·표준 도메인에 신호가 없거나 실측 확인 전이라 추정으로 표시(오일류는 정비주기·주행거리 기반 계산) | 엔진오일 · 미션(변속기)오일 · 와이퍼 블레이드 수명 · 타이어 공기압 수치 · 12V 배터리 · 전비(평균) | `ValueEstimator` (실신호 아님) |
 
 > 연동 절차: `data/PleosVehicleDataSource.kt`의 TODO를 각 도메인의 `checkXXXCapabilities` 확인 후
 > 실제 조회 호출로 교체하고, `MainActivity`에서 데이터 소스를 `PleosVehicleDataSource`로 주입합니다.

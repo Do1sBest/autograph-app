@@ -22,7 +22,7 @@ class MockVehicleDataSource : VehicleDataRepository {
                 VehiclePart(
                     "타이어(뒤우)", "2.1 bar", PartStatus.WARN, DataSource.ESTIMATED, HotspotRole.TIRE_RR,
                     care = PartCare(
-                        reason = "뒤 우측 타이어 저압 경고(TPMS)가 감지됐어요. 정확한 공기압 수치는 추정값입니다.",
+                        reason = "저압 경고(TPMS) 감지 · 정확한 수치는 추정값이에요.",
                         timing = "이번 주 안에 공기압 보충 · 반복되면 점검",
                         spec = "권장 공기압은 운전석 도어 안쪽 라벨 기준",
                         partNo = "해당 없음 (보충/점검 항목)",
@@ -92,7 +92,7 @@ class MockVehicleDataSource : VehicleDataRepository {
                 VehiclePart(
                     "타이어(뒤우)", "2.1 bar", PartStatus.WARN, DataSource.ESTIMATED, HotspotRole.TIRE_RR,
                     care = PartCare(
-                        reason = "뒤 우측 타이어 저압 경고(TPMS)가 감지됐어요. 정확한 공기압 수치는 추정값입니다.",
+                        reason = "저압 경고(TPMS) 감지 · 정확한 수치는 추정값이에요.",
                         timing = "이번 주 안에 공기압 보충 · 반복되면 점검",
                         spec = "권장 공기압은 운전석 도어 안쪽 라벨 기준",
                         partNo = "해당 없음 (보충/점검 항목)",

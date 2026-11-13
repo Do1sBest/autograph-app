@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.autograph.app.data.DataSource
 import com.autograph.app.data.VehiclePart
 
 /**
@@ -126,7 +127,7 @@ private fun careStoryCards(
             sub = care.reason,
             icon = Icons.Filled.Warning, art = "tire_gauge.webp", tint = warn,
             versus = Versus(
-                mine = part.value, mineSub = "${part.source.label} 측정",
+                mine = part.value, mineSub = if (part.source == DataSource.REALTIME) "실시간 측정" else "${part.source.label}값",
                 otherLabel = "$model 권장", other = rec?.let { "${bar1(it)} bar" } ?: "확인 필요",
                 otherSub = info?.specMain ?: "",
                 frac = if (mine != null && rec != null) (mine / rec).toFloat() else null,
