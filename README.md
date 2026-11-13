@@ -1,7 +1,7 @@
 # 오토그래프 (AUTOGRAPH)
 
 현대자동차그룹 **차량용 앱 개발 공모전** 출품작.
-차량의 **상태(컨디션)** 와 **자산가치**를 인포그래픽으로 보여주는 Android Automotive(AAOS) 앱입니다.
+차량의 **상태(컨디션)** 와 **자산가치**를 인포그래픽으로 보여주는 **PleOS(플레이오스)** 차량용 앱입니다.
 
 > "내 차가 지금 어떤 상태이고, 동일 연식 평균 대비 얼마나 가치 있는가"를 운전 흐름 속에서 한눈에.
 
@@ -23,29 +23,38 @@
 | **밸류 패스포트** | (주차 중 '자세히') | 정비/사고 이력 · 가치 산정 근거 |
 
 ## 기술 스택
-- **Android Automotive OS** / **Jetpack Compose** / Kotlin, minSdk 28, compileSdk 34
+- **PleOS (Pleos OS)** / **Jetpack Compose** / Kotlin, compileSdk 34
+  - 기존 Android Automotive OS(AAOS) 기반에서 **PleOS 기반으로 전환**했습니다.
 - **차량 3D**: GLB를 3/4 뷰로 렌더한 투명 PNG 사용
-  - 에뮬레이터에서 Filament 네이티브 렌더가 크래시해 이미지 방식으로 대체
+  - 시뮬레이터에서 Filament 네이티브 렌더가 크래시해 이미지 방식으로 대체
   - 실기기 헤드유닛용 Filament 구현은 `docs/filament-reference/` 에 보존
-- **기어 연동**: `android.car` CarPropertyManager(`GEAR_SELECTION`)
-  - 권한(`CAR_POWERTRAIN`) 미승인 시 화면 기어 셀렉터로 자동 폴백
-- **데이터**: `MockVehicleDataSource`(데모) ↔ `PleosVehicleDataSource`(실차량, Pleos Vehicle SDK)
+- **기어/주행 연동**: **Pleos Vehicle SDK — DrivingMode 도메인**
+  - 권한 미승인·미지원 시 화면 하단 기어 셀렉터로 자동 폴백
+- **데이터**: `MockVehicleDataSource`(데모) ↔ `PleosVehicleDataSource`(실차량, **Pleos Vehicle SDK**)
 
 ## 실행 방법
 1. **Android Studio**로 `autograph-app` 폴더 열기 → Gradle Sync
-2. **Automotive 에뮬레이터** 생성
-   - Device Manager → Create Device → **Automotive**
-   - 시스템 이미지: **Automotive with Google APIs** (API 34, x86_64)
-   - Graphics: **Hardware** 권장
-3. ▶ **Run**
+2. **PleOS 시뮬레이터(Pleos Simulator)** 실행
+   - Pleos Playground 안내에 따라 PleOS 시스템 이미지/시뮬레이터를 띄웁니다.
+   - Graphics: **Hardware(GPU 가속)** 권장
+3. ▶ **Run** → PleOS 차량 런처에서 "오토그래프" 실행
 4. 하단 **기어(P/R/N/D)** 또는 실제 기어 변경으로 화면 전환 확인
 
-> 데모는 `MockVehicleDataSource`(가상 데이터)라 Pleos SDK 없이 바로 실행됩니다.
+> 데모는 `MockVehicleDataSource`(가상 데이터)라 Pleos SDK 연결 없이 시뮬레이터에서 바로 실행됩니다.
 
-## 실차량 데이터 연동
-`data/PleosVehicleDataSource.kt`의 TODO를 Pleos Vehicle SDK 도메인 호출로 교체:
-`Odometer · Tire · Brake · EvBattery · Fuel · Wiper · Steeringwheel · DrivingMode`.
-엔진/미션오일은 Pleos·AAOS 표준 속성이 없어 **정비주기·주행 기반 추정**으로 처리.
+## 실차량 데이터 연동 — 실시간 vs 추정 (데이터 정직성)
+상태 항목에는 **출처 태그**(실시간 / 추정)를 붙여 기술적 정직성을 확보합니다.
+Pleos 시뮬레이터 API를 통해 **실제 신호로 받아오는 값**과, 신호가 없어 **알고리즘으로 계산하는 값**을 명확히 구분합니다.
+
+| 구분 | 설명 | 항목 | 출처 |
+|---|---|---|---|
+| **실시간(Real-time)** | Pleos 시뮬레이터 API(도메인 조회)로 실제 신호를 수신 | 주행거리 · 타이어 · 브레이크 · EV 배터리 · 연료 · 와이퍼 · 스티어링 · 주행모드 | `Odometer·Tire·Brake·EvBattery·Fuel·Wiper·Steeringwheel·DrivingMode` |
+| **실시간(조건부)** | 지원 차량에 한해 실제 신호 제공 | 브레이크 패드 잔량 | `BRAKE_PAD_WEAR_PERCENTAGE` (100 − 마모%) |
+| **추정(Estimated)** | Pleos·표준 도메인에 신호가 없어 정비주기·주행거리 기반 알고리즘으로 계산 | 엔진오일 · 미션(변속기)오일 · 와이퍼 블레이드 수명 | `ValueEstimator` (실신호 아님) |
+
+> 연동 절차: `data/PleosVehicleDataSource.kt`의 TODO를 각 도메인의 `checkXXXCapabilities` 확인 후
+> 실제 조회 호출로 교체하고, `MainActivity`에서 데이터 소스를 `PleosVehicleDataSource`로 주입합니다.
+> 지원 여부는 차량 모델별로 다르므로 모델명 분기가 아닌 **capability 체크**로 판단합니다.
 
 ## 프로젝트 구조
 ```
@@ -69,7 +78,7 @@ docs/filament-reference/           # 실기기용 Filament 3D 코드(참고)
   데모의 부품번호·사양은 **예시**이며, 오일 등급 같은 소모품 사양은 엔진/모델 스펙표로 먼저 제시할 수 있습니다.
 
 ## 외관 관리 전략
-- **서라운드 뷰 카메라는 쓰지 않습니다.** AAOS에서 외부 카메라는 시스템(EVS) 권한 영역이라 일반 앱에 공개되지 않고,
+- **서라운드 뷰 카메라는 쓰지 않습니다.** 외부 카메라는 시스템(EVS) 권한 영역이라 일반 앱에 공개되지 않고,
   주차 보조용 광각이라 차체 전체의 스크래치·덴트 평가에도 맞지 않습니다.
 - **사용자에게 촬영을 강요하지 않습니다.** 평소에는 충격·주차 이벤트 감지와 알림만.
 - **촬영은 선택**: 매각 준비 시 10초 워크어라운드 → 밸류 패스포트의 **'검증 외관'** 항목으로 가치 근거가 됩니다.
