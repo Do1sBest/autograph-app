@@ -22,6 +22,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.autograph.app.data.Gear
 import com.autograph.app.data.GearSource
 import com.autograph.app.data.VehicleSnapshot
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 
 enum class Scene { PARKED, DRIVING, END, PASSPORT }
@@ -37,11 +41,22 @@ fun AutographApp(vm: VehicleViewModel = viewModel()) {
     var manualGear by remember { mutableStateOf(Gear.PARK) }
     val gear = if (realConnected) realGear else manualGear
 
-    // 실제 기어 폴링
+    // 실제 기어 — 바뀔 때만 받는다(11-13 Pleos 성능 기준 '불필요한 폴링 최소화', 전엔 0.35초마다 읽음).
+    // 콜백 등록이 안 되는 차에서만 예전처럼 0.35초 읽기, 그것도 화면이 보일 때만
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(realConnected) {
-        if (realConnected) while (true) {
-            gearSource.readGear()?.let { realGear = it }
-            delay(350)
+        if (!realConnected) return@LaunchedEffect
+        gearSource.readGear()?.let { realGear = it }
+        val stop = gearSource.listen { realGear = it }
+        if (stop != null) {
+            try { awaitCancellation() } finally { stop() }
+        } else {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    gearSource.readGear()?.let { realGear = it }
+                    delay(350)
+                }
+            }
         }
     }
 

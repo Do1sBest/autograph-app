@@ -3,6 +3,7 @@ package com.autograph.app.data
 import android.car.Car
 import android.car.VehicleGear
 import android.car.VehiclePropertyIds
+import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
 import android.content.Context
 
@@ -43,16 +44,42 @@ class GearSource(context: Context) {
     fun readGear(): Gear? {
         val m = manager ?: return null
         return try {
-            when (m.getIntProperty(VehiclePropertyIds.GEAR_SELECTION, 0)) {
-                VehicleGear.GEAR_PARK -> Gear.PARK
-                VehicleGear.GEAR_REVERSE -> Gear.REVERSE
-                VehicleGear.GEAR_NEUTRAL -> Gear.NEUTRAL
-                VehicleGear.GEAR_UNKNOWN -> Gear.UNKNOWN
-                else -> Gear.DRIVE // GEAR_DRIVE 및 전진 단수
-            }
+            toGear(m.getIntProperty(VehiclePropertyIds.GEAR_SELECTION, 0))
         } catch (t: Throwable) {
             null
         }
+    }
+
+    /**
+     * 기어가 바뀔 때만 알려 줌 — 11-13 Pleos 성능 기준 '불필요한 폴링 최소화'(전엔 0.35초마다 읽었다). 받는 쪽은 메인 스레드.
+     * 반환 = 그만 받기. 등록이 안 되면 null(그때만 부르는 쪽이 예전처럼 읽기로 대신).
+     */
+    fun listen(onGear: (Gear) -> Unit): (() -> Unit)? {
+        val m = manager ?: return null
+        val main = android.os.Handler(android.os.Looper.getMainLooper())
+        val cb = object : CarPropertyManager.CarPropertyEventCallback {
+            override fun onChangeEvent(value: CarPropertyValue<*>) {
+                val v = value.value as? Int ?: return
+                main.post { onGear(toGear(v)) }
+            }
+
+            override fun onErrorEvent(propertyId: Int, zone: Int) {}
+        }
+        val ok = try {
+            m.registerCallback(cb, VehiclePropertyIds.GEAR_SELECTION, CarPropertyManager.SENSOR_RATE_ONCHANGE)
+        } catch (t: Throwable) {
+            false
+        }
+        if (!ok) return null
+        return { try { m.unregisterCallback(cb) } catch (_: Throwable) {} }
+    }
+
+    private fun toGear(v: Int): Gear = when (v) {
+        VehicleGear.GEAR_PARK -> Gear.PARK
+        VehicleGear.GEAR_REVERSE -> Gear.REVERSE
+        VehicleGear.GEAR_NEUTRAL -> Gear.NEUTRAL
+        VehicleGear.GEAR_UNKNOWN -> Gear.UNKNOWN
+        else -> Gear.DRIVE // GEAR_DRIVE 및 전진 단수
     }
 
     fun close() {

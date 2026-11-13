@@ -37,28 +37,28 @@ fun DrivingScreen(snapshot: VehicleSnapshot, onRecord: (Float, Float) -> Unit) {
         var lastSecSpeed = speed
         var braking = false
         var brakeMax = 0f
-        var acc = 0
+        // 11-13 Pleos 성능 기준(불필요한 타이머·폴링 최소화): 예전엔 0.055초마다 깨어 계산했다(앱을 뒤로 보내도 그대로, CPU 1코어 2.3%).
+        // 화면은 원래 1초에 한 번만 바뀌므로 1초에 한 번 깨어 그 1초 몫(0.055초 × 18걸음)을 한꺼번에 계산 — 신호 모양은 같음.
+        // 주행 기록(운전 종료 화면 그래프)이 이어져야 해서 뒤에 있어도 1초에 한 번은 돈다
         while (true) {
-            // 합성 신호(기존 시연과 같은 식)
-            t += 0.06
-            val target = (48 + 26 * sin(t * 0.22) + 9 * sin(t * 0.63)).toFloat().coerceIn(0f, 150f)
-            speed += (target - speed) * 0.08f
-            val brake = (0.7f * (sin(t * 0.8).toFloat() - 0.55f)).coerceIn(0f, 1f)
-            if (brake > 0.6f && !braking) hardBrakes++
-            braking = brake > 0.6f
-            brakeMax = maxOf(brakeMax, brake)
-            km += speed * 0.055 / 3600.0
-            delay(55)
-            acc += 55
-            if (acc >= 1000) {           // 화면은 1초에 한 번만 바뀜
-                acc -= 1000
-                secs++
-                if (speed - lastSecSpeed > 15f) hardAccels++
-                lastSecSpeed = speed
-                onRecord(speed, brakeMax)
-                brakeMax = 0f
-                shown = DriveStats(km, secs, hardBrakes, hardAccels)
+            delay(1000)
+            repeat(18) {
+                // 합성 신호(기존 시연과 같은 식)
+                t += 0.06
+                val target = (48 + 26 * sin(t * 0.22) + 9 * sin(t * 0.63)).toFloat().coerceIn(0f, 150f)
+                speed += (target - speed) * 0.08f
+                val brake = (0.7f * (sin(t * 0.8).toFloat() - 0.55f)).coerceIn(0f, 1f)
+                if (brake > 0.6f && !braking) hardBrakes++
+                braking = brake > 0.6f
+                brakeMax = maxOf(brakeMax, brake)
+                km += speed * 0.055 / 3600.0
             }
+            secs++
+            if (speed - lastSecSpeed > 15f) hardAccels++
+            lastSecSpeed = speed
+            onRecord(speed, brakeMax)
+            brakeMax = 0f
+            shown = DriveStats(km, secs, hardBrakes, hardAccels)
         }
     }
 

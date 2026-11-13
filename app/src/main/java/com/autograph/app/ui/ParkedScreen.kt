@@ -8,10 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -19,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -157,10 +155,15 @@ private fun ValueHero(s: VehicleSnapshot, onOpenPassport: () -> Unit) {
 /** 문제 부위 핀 — 프레임별 위치로 부위를 따라다님(반대편이면 반투명). */
 @Composable
 private fun HotspotPin(part: VehiclePart, fx: Float, fy: Float, faceVisible: Boolean, scope: BoxScope) {
-    val inf = rememberInfiniteTransition(label = "pin")
-    val pulse by inf.animateFloat(
-        0.35f, 1f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "pinA"
-    )
+    // 11-13 Pleos 성능 기준(주차 중 CPU 25% 이하): 끝없이 깜빡이면 1초에 60번 다시 그려 CPU 1코어 34%(에뮬레이터 측정) →
+    // 나타날 때(차종이 바뀔 때) 3번만 깜빡이고 멈춤. 알파는 그리기 단계에서만 읽어 깜빡이는 동안에도 화면 구성을 다시 하지 않음
+    val pulse = remember { Animatable(1f) }
+    LaunchedEffect(part.name) {
+        repeat(3) {
+            pulse.animateTo(0.35f, tween(900))
+            pulse.animateTo(1f, tween(900))
+        }
+    }
     val pinAlpha = if (faceVisible) 1f else 0.3f
     with(scope) {
         Row(
@@ -171,7 +174,7 @@ private fun HotspotPin(part: VehiclePart, fx: Float, fy: Float, faceVisible: Boo
                 .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(Modifier.size(12.dp).alpha(pulse).background(part.status.color(), CircleShape))
+            Box(Modifier.size(12.dp).graphicsLayer { alpha = pulse.value }.background(part.status.color(), CircleShape))
             Spacer(Modifier.width(8.dp))
             Text(part.name, color = Palette.Ink, fontSize = T.Caption, fontWeight = FontWeight.SemiBold)
         }
