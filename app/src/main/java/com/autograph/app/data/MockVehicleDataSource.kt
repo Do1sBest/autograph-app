@@ -17,18 +17,18 @@ class MockVehicleDataSource : VehicleDataRepository {
             valueNote = "배터리 SoH가 양호해 표준 시세 대비 +170만원으로 평가됩니다.",
             parts = listOf(
                 VehiclePart("구동 배터리 SoH", "96%", PartStatus.GOOD, DataSource.ESTIMATED),
-                VehiclePart("전비(평균)", "5.6 km/kWh", PartStatus.GOOD, DataSource.REALTIME),
+                VehiclePart("전비(평균)", "5.6 km/kWh", PartStatus.GOOD, DataSource.ESTIMATED),
                 VehiclePart("와이퍼", "정상", PartStatus.GOOD, DataSource.REALTIME),
                 VehiclePart(
-                    "타이어(뒤우)", "2.1 bar", PartStatus.WARN, DataSource.REALTIME, HotspotRole.TIRE_RR,
+                    "타이어(뒤우)", "2.1 bar", PartStatus.WARN, DataSource.ESTIMATED, HotspotRole.TIRE_RR,
                     care = PartCare(
-                        reason = "뒤 우측 공기압이 다른 바퀴보다 낮게 측정되고 있어요.",
+                        reason = "뒤 우측 타이어 저압 경고(TPMS)가 감지됐어요. 정확한 공기압 수치는 추정값입니다.",
                         timing = "이번 주 안에 공기압 보충 · 반복되면 점검",
                         spec = "권장 공기압은 운전석 도어 안쪽 라벨 기준",
                         partNo = "해당 없음 (보충/점검 항목)",
                     ),
                 ),
-                VehiclePart("브레이크 패드", "65%", PartStatus.GOOD, DataSource.REALTIME),
+                VehiclePart("브레이크 패드", "65%", PartStatus.GOOD, DataSource.ESTIMATED),
                 VehiclePart("엔진/미션오일", "해당 없음", PartStatus.MUTED, DataSource.NONE),
             ),
             passport = listOf(
@@ -58,9 +58,9 @@ class MockVehicleDataSource : VehicleDataRepository {
                         partNo = "VIN 기준 조회 필요 (예시)",
                     ),
                 ),
-                VehiclePart("타이어(앞)", "2.2 bar", PartStatus.GOOD, DataSource.REALTIME),
-                VehiclePart("브레이크 패드", "50%", PartStatus.GOOD, DataSource.REALTIME),
-                VehiclePart("12V 배터리", "양호", PartStatus.GOOD, DataSource.REALTIME),
+                VehiclePart("타이어(앞)", "2.2 bar", PartStatus.GOOD, DataSource.ESTIMATED),
+                VehiclePart("브레이크 패드", "50%", PartStatus.GOOD, DataSource.ESTIMATED),
+                VehiclePart("12V 배터리", "양호", PartStatus.GOOD, DataSource.ESTIMATED),
             ),
             passport = listOf(
                 PassportRow("차량", "아반떼 · 2022"),
@@ -90,16 +90,16 @@ class MockVehicleDataSource : VehicleDataRepository {
                 ),
                 VehiclePart("미션오일", "정상", PartStatus.GOOD, DataSource.ESTIMATED),
                 VehiclePart(
-                    "타이어(뒤우)", "2.1 bar", PartStatus.WARN, DataSource.REALTIME, HotspotRole.TIRE_RR,
+                    "타이어(뒤우)", "2.1 bar", PartStatus.WARN, DataSource.ESTIMATED, HotspotRole.TIRE_RR,
                     care = PartCare(
-                        reason = "뒤 우측 공기압이 다른 바퀴보다 낮게 측정되고 있어요.",
+                        reason = "뒤 우측 타이어 저압 경고(TPMS)가 감지됐어요. 정확한 공기압 수치는 추정값입니다.",
                         timing = "이번 주 안에 공기압 보충 · 반복되면 점검",
                         spec = "권장 공기압은 운전석 도어 안쪽 라벨 기준",
                         partNo = "해당 없음 (보충/점검 항목)",
                     ),
                 ),
-                VehiclePart("브레이크 패드", "60%", PartStatus.GOOD, DataSource.REALTIME),
-                VehiclePart("12V 배터리", "양호", PartStatus.GOOD, DataSource.REALTIME),
+                VehiclePart("브레이크 패드", "60%", PartStatus.GOOD, DataSource.ESTIMATED),
+                VehiclePart("12V 배터리", "양호", PartStatus.GOOD, DataSource.ESTIMATED),
             ),
             passport = listOf(
                 PassportRow("차량", "투싼 · 2024"),
