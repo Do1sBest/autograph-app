@@ -14,9 +14,9 @@ captures/
 # === 머신별 로컬 설정 (SDK 경로 등 — 절대 올리지 않음) ===
 local.properties
 
-# === 빌드 결과물 / APK ===
+# === 빌드 결과물 / APK (제출용 apk/ 폴더는 예외로 포함) ===
 *.apk
-/apk/*.apk
+!/apk/*.apk
 
 # === 미사용 소스 에셋 (GLB는 렌더 PNG로 대체됨 — 용량 약 8MB) ===
 app/src/main/assets/*.glb

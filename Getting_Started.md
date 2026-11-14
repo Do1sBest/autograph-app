@@ -6,7 +6,7 @@
 ## 1. 요구 환경
 - Android Studio (AGP 8.10.x 지원 버전 — Meerkat 이상), JDK 17
 - Android SDK Platform 34 · **AGP 8.10.1 / Kotlin 2.0.20 / Gradle 8.11.1** (프로젝트에 고정)
-- **Pleos Connect Emulator v2.1.0** (Form Factor: Automotive · API 34 · Cold boot · RAM 4GB)
+- **Pleos Connect Emulator v2.1.0 이상** (Form Factor: Automotive · API 34 · Cold boot · RAM 4GB)
 - GPU 하드웨어 가속 ON 권장
 
 > **플랫폼 참고:** 본 앱은 **Android Automotive OS(AAOS) 기반 Pleos Connect** 플랫폼에서 동작합니다.
